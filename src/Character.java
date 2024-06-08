@@ -1,19 +1,42 @@
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Scanner;
 
 public class Character {
-    int dex=0;
-    int str=0;
-    int con=0;
-    int wis=0;
-    int intel=0;
-    int cha=0;
+    AbilityScore dex= new AbilityScore(0,"Dexterity");
+    AbilityScore str=new AbilityScore(0,"Strength");
+    AbilityScore con= new AbilityScore(0,"Constitution");
+    AbilityScore wis= new AbilityScore(0,"Wisdom");
+    AbilityScore intel= new AbilityScore(0,"Intelligence");
+    AbilityScore cha= new AbilityScore(0,"Charisma");
+    ArrayList<AbilityScore> statList = new ArrayList<>();
+
+    public void setStatList() {
+        statList.add(dex);
+        statList.add(str);
+        statList.add(con);
+        statList.add(wis);
+        statList.add(intel);
+        statList.add(cha);
+    }
+
     int currPoints = 27;
     int[] pointCost ={1,2,3,4,5,7,9,11,13,15,17,19};
-    public void pointBuy(String statname, int stat) {
-        //Dexterity:
-        while(stat==0) {
+
+    public void setUp() throws URISyntaxException {
+        URL resource = getClass().getResource("Races - Sheet1.csv");
+        assert resource != null;
+        File raceFile = new File(resource.toURI());
+        doPointBuy();
+    }
+    public void pointBuy(AbilityScore abilityScore) {
+        while(abilityScore.value==0) {
             Scanner userInput = new Scanner(System.in);
-            System.out.println("Please enter your value for "+statname+". You have " + currPoints + " points.");
+            System.out.println("Please enter your value for "+ abilityScore.name+". You have " + currPoints + " points.");
             try {
                 int wantedScore = userInput.nextInt();
                 if (wantedScore > 20) {
@@ -21,30 +44,65 @@ public class Character {
                 } else if (wantedScore < 3) {
                     System.out.println("Please choose a value between 3-20");
                 } else if (wantedScore <= 8) {
-                    stat = wantedScore;
+                    abilityScore.changeValue(wantedScore);
                 } else {
                     int tempCurrPoints = currPoints - getPointCost(wantedScore);
                     if (tempCurrPoints < 0) {
                         System.out.println("You do not have enough points for that score.");
                     } else {
-                        System.out.println("Your "+statname+" is set for " + wantedScore + ".");
+                        System.out.println("Your "+ abilityScore.name+" is set for " + wantedScore + ".");
                         currPoints = tempCurrPoints;
-                        stat = wantedScore;
+                        abilityScore.changeValue(wantedScore);
                     }
                 }
             } catch (Exception e) {
                 System.out.println("That's not a number.");
-
             }
         }
     }
     public void doPointBuy(){
-        pointBuy("Dexterity", dex);
-        pointBuy("Strength", str);
-        pointBuy("Constitution", con);
-        pointBuy("Wisdom", wis);
-        pointBuy("Intelligence", intel);
-        pointBuy("Charisma", cha);
+        pointBuy(dex);
+        pointBuy(str);
+        pointBuy(con);
+        pointBuy(wis);
+        pointBuy(intel);
+        pointBuy(cha);
+        setStatList();
+
+        System.out.println("\nYour stats are:");
+        for (AbilityScore abilityScore : statList) {
+            System.out.println(abilityScore.name + ": "+ abilityScore.value+" ("+ abilityScore.getModifier()+")");
+        }
+    }
+    public void suggestClass(){
+        //.indexOf(element)
+        //Sort the arrayList to the highest first
+        Collections.sort(statList, new Comparator<AbilityScore>() {
+            @Override
+            public int compare(AbilityScore o1, AbilityScore o2) {
+                return Integer.compare(o1.value,o2.value);
+            }
+        });
+        Collections.reverse(statList);
+        String topStat = statList.get(0).name;
+        String secondStat = statList.get(1).name;
+        System.out.println("Your recommended class is: ");
+        switch(topStat){
+            case "Strength":
+              if(secondStat.equals("Constitution")) {
+                //Barbarian
+                  // Fighter
+              }else if(secondStat.equals("Charisma")) {
+                //Paladin
+              }else {
+                //All of them
+              }
+              break;
+            case "Charisma":
+                if(secondStat.equals("Dexterity")) {
+                    //Bard
+                }
+        }
     }
     public int getPointCost(int wantedScore){
         return pointCost[wantedScore-9];
