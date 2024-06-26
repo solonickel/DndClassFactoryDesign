@@ -1,10 +1,7 @@
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Scanner;
+import java.util.*;
 
 public class Character {
     AbilityScore dex= new AbilityScore(0,"Dexterity");
@@ -15,6 +12,14 @@ public class Character {
     AbilityScore cha= new AbilityScore(0,"Charisma");
     ArrayList<AbilityScore> statList = new ArrayList<>();
 
+    private static final Map<List<String>, List<String>> classMapping = new HashMap<>();
+    static{
+        classMapping.put(Arrays.asList("Strength","Constitution"),Arrays.asList("Barbarian","Fighter"));
+        classMapping.put(Arrays.asList("Strength","Charisma"),Arrays.asList("Paladin"));
+        classMapping.put(Arrays.asList("Dexterity","Constitution"),Arrays.asList("Fighter"));
+        classMapping.put(Arrays.asList("Dexterity","Wisdom"),Arrays.asList("Ranger"));
+        classMapping.put(Arrays.asList("Intelligence","Dexterity"),Arrays.asList("Wizard"));
+    }
     public void setStatList() {
         statList.add(dex);
         statList.add(str);
@@ -32,6 +37,7 @@ public class Character {
         assert resource != null;
         File raceFile = new File(resource.toURI());
         doPointBuy();
+        suggestClass();
     }
     public void pointBuy(AbilityScore abilityScore) {
         while(abilityScore.value==0) {
@@ -55,18 +61,20 @@ public class Character {
                         abilityScore.changeValue(wantedScore);
                     }
                 }
+                userInput.close();
             } catch (Exception e) {
                 System.out.println("That's not a number.");
             }
         }
     }
     public void doPointBuy(){
-        pointBuy(dex);
-        pointBuy(str);
-        pointBuy(con);
-        pointBuy(wis);
-        pointBuy(intel);
-        pointBuy(cha);
+
+            pointBuy(dex);
+            pointBuy(con);
+            pointBuy(wis);
+            pointBuy(intel);
+            pointBuy(str);
+            pointBuy(cha);
         setStatList();
 
         System.out.println("\nYour stats are:");
@@ -87,23 +95,16 @@ public class Character {
         String topStat = statList.get(0).name;
         String secondStat = statList.get(1).name;
         System.out.println("Your recommended class is: ");
-        switch(topStat){
-            case "Strength":
-              if(secondStat.equals("Constitution")) {
-                //Barbarian
-                  // Fighter
-              }else if(secondStat.equals("Charisma")) {
-                //Paladin
-              }else {
-                //All of them
-              }
-              break;
-            case "Charisma":
-                if(secondStat.equals("Dexterity")) {
-                    //Bard
-                }
+        List<String> recommendedClasses = classMapping.getOrDefault(Arrays.asList(topStat, secondStat), classMapping.get(Arrays.asList(secondStat, topStat)));
+
+        if(recommendedClasses != null) {
+            for (String className : recommendedClasses) {
+                System.out.println(className);
+            }
         }
+
     }
+
     public int getPointCost(int wantedScore){
         return pointCost[wantedScore-9];
     }
