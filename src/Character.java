@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -32,16 +33,32 @@ public class Character {
     int currPoints = 27;
     int[] pointCost ={1,2,3,4,5,7,9,11,13,15,17,19};
 
-    public void setUp() throws URISyntaxException {
+    public void setUp() throws URISyntaxException, FileNotFoundException {
         URL resource = getClass().getResource("Races - Sheet1.csv");
         assert resource != null;
         File raceFile = new File(resource.toURI());
+        setRace(raceFile);
         doPointBuy();
+
         suggestClass();
     }
-    public void pointBuy(AbilityScore abilityScore) {
+    public void setRace(File raceFile) throws FileNotFoundException {
+        Scanner raceReader = new Scanner(raceFile);
+        HashMap<String, Integer[]> raceBonuses = new HashMap<>();
+        String[] headers = raceReader.nextLine().split(",");
+        while(raceReader.hasNextLine()) {
+            String[] line = raceReader.nextLine().split(",");
+            ArrayList<Integer> raceNumBonuses = new ArrayList<>();
+            for(int i=1; i<line.length; i++) {
+                raceNumBonuses.add(Integer.parseInt(line[i]));
+            }
+            Integer[] raceNumArray = raceNumBonuses.toArray(new Integer[5]);
+            raceBonuses.put(line[0], raceNumArray);
+        }
+    }
+    public void pointBuy(AbilityScore abilityScore, Scanner userInput) {
         while(abilityScore.value==0) {
-            Scanner userInput = new Scanner(System.in);
+
             System.out.println("Please enter your value for "+ abilityScore.name+". You have " + currPoints + " points.");
             try {
                 int wantedScore = userInput.nextInt();
@@ -61,21 +78,24 @@ public class Character {
                         abilityScore.changeValue(wantedScore);
                     }
                 }
-                userInput.close();
+
             } catch (Exception e) {
                 System.out.println("That's not a number.");
+                userInput.nextInt();
             }
+
         }
     }
     public void doPointBuy(){
-
-            pointBuy(dex);
-            pointBuy(con);
-            pointBuy(wis);
-            pointBuy(intel);
-            pointBuy(str);
-            pointBuy(cha);
+        Scanner userInput = new Scanner(System.in);
+            pointBuy(dex, userInput);
+            pointBuy(con, userInput);
+            pointBuy(wis, userInput);
+            pointBuy(intel, userInput);
+            pointBuy(str, userInput);
+            pointBuy(cha, userInput);
         setStatList();
+        userInput.close();
 
         System.out.println("\nYour stats are:");
         for (AbilityScore abilityScore : statList) {
@@ -85,12 +105,7 @@ public class Character {
     public void suggestClass(){
         //.indexOf(element)
         //Sort the arrayList to the highest first
-        Collections.sort(statList, new Comparator<AbilityScore>() {
-            @Override
-            public int compare(AbilityScore o1, AbilityScore o2) {
-                return Integer.compare(o1.value,o2.value);
-            }
-        });
+        Collections.sort(statList, Comparator.comparingInt(o -> o.value));
         Collections.reverse(statList);
         String topStat = statList.get(0).name;
         String secondStat = statList.get(1).name;
