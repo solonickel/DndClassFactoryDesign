@@ -12,7 +12,8 @@ public class Character {
     AbilityScore intel= new AbilityScore(0,"Intelligence");
     AbilityScore cha= new AbilityScore(0,"Charisma");
     ArrayList<AbilityScore> statList = new ArrayList<>();
-
+    String[] headers;
+    HashMap<String, Integer[]> raceBonuses = new HashMap<>();
     private static final Map<List<String>, List<String>> classMapping = new HashMap<>();
     static{
         classMapping.put(Arrays.asList("Strength","Constitution"),Arrays.asList("Barbarian","Fighter"));
@@ -37,15 +38,14 @@ public class Character {
         URL resource = getClass().getResource("Races - Sheet1.csv");
         assert resource != null;
         File raceFile = new File(resource.toURI());
-        setRace(raceFile);
+        setRaceFile(raceFile);
+        printRaces();
         doPointBuy();
-
         suggestClass();
     }
-    public void setRace(File raceFile) throws FileNotFoundException {
+    public void setRaceFile(File raceFile) throws FileNotFoundException {
         Scanner raceReader = new Scanner(raceFile);
-        HashMap<String, Integer[]> raceBonuses = new HashMap<>();
-        String[] headers = raceReader.nextLine().split(",");
+        headers = raceReader.nextLine().split(",");
         while(raceReader.hasNextLine()) {
             String[] line = raceReader.nextLine().split(",");
             ArrayList<Integer> raceNumBonuses = new ArrayList<>();
@@ -55,6 +55,34 @@ public class Character {
             Integer[] raceNumArray = raceNumBonuses.toArray(new Integer[5]);
             raceBonuses.put(line[0], raceNumArray);
         }
+    }
+    private  void printRaces(){
+        for(Map.Entry<String, Integer[]> entry : raceBonuses.entrySet()) {
+            String key = entry.getKey();
+            Integer[] values = entry.getValue();
+            System.out.print(key+":");
+            int i = 1;
+            for(Integer val : values) {
+
+                if(val!=0) {
+                    System.out.print(" "+headers[i]+":");
+                    System.out.print(" "+val);
+                }
+                i++;
+            }
+            System.out.println(" ");
+        }
+    }
+    private void chooseRace(){
+        Scanner userInput = new Scanner(System.in);
+        boolean answrIsValid = false;
+        printRaces();
+        System.out.println("Please choose your race: ");
+        while(!answrIsValid) {
+            String slectedRace = userInput.nextLine();
+
+        }
+        userInput.close();
     }
     public void pointBuy(AbilityScore abilityScore, Scanner userInput) {
         while(abilityScore.value==0) {
