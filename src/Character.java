@@ -11,6 +11,7 @@ public class Character {
     AbilityScore wis= new AbilityScore(0,"Wisdom");
     AbilityScore intel= new AbilityScore(0,"Intelligence");
     AbilityScore cha= new AbilityScore(0,"Charisma");
+    String charRace;
     ArrayList<AbilityScore> statList = new ArrayList<>();
     String[] headers;
     HashMap<String, Integer[]> raceBonuses = new HashMap<>();
@@ -40,6 +41,7 @@ public class Character {
         File raceFile = new File(resource.toURI());
         setRaceFile(raceFile);
         printRaces();
+        chooseRace();
         doPointBuy();
         suggestClass();
     }
@@ -77,10 +79,19 @@ public class Character {
         Scanner userInput = new Scanner(System.in);
         boolean answrIsValid = false;
         printRaces();
-        System.out.println("Please choose your race: ");
         while(!answrIsValid) {
-            String slectedRace = userInput.nextLine();
+            System.out.println("Please choose your race: ");
+            String selectedRace = userInput.nextLine();
 
+                if (!Objects.equals(raceBonuses.get(selectedRace), null)) {
+                    charRace = selectedRace;
+                    answrIsValid=true;
+
+                }
+
+            if(!answrIsValid) {
+                System.out.println("Couldn't find that race.");
+            }
         }
         userInput.close();
     }
@@ -115,15 +126,15 @@ public class Character {
         }
     }
     public void doPointBuy(){
-        Scanner userInput = new Scanner(System.in);
-            pointBuy(dex, userInput);
-            pointBuy(con, userInput);
-            pointBuy(wis, userInput);
-            pointBuy(intel, userInput);
-            pointBuy(str, userInput);
-            pointBuy(cha, userInput);
+        Scanner userInput1 = new Scanner(System.in);
+            pointBuy(dex, userInput1);
+            pointBuy(con, userInput1);
+            pointBuy(wis, userInput1);
+            pointBuy(intel, userInput1);
+            pointBuy(str, userInput1);
+            pointBuy(cha, userInput1);
         setStatList();
-        userInput.close();
+        userInput1.close();
 
         System.out.println("\nYour stats are:");
         for (AbilityScore abilityScore : statList) {
